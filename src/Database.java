@@ -1,5 +1,6 @@
 
 import java.util.HashMap;
+import java.util.Set;
 
 public class Database {
     private HashMap<String, String> storage;
@@ -19,5 +20,11 @@ public class Database {
     }
     public boolean EXISTS(String key) {
         return storage.containsKey(key);
+    }
+    public Set<String> KEYS() {
+        return storage.keySet();
+    }
+    public void CLEAR() {
+        storage.clear();
     }
 }
