@@ -1,9 +1,10 @@
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Database {
-    private HashMap<String, String> storage;
+    private final Map<String, String> storage;
     public Database() {
         storage = new HashMap<>();
     }
@@ -27,4 +28,8 @@ public class Database {
     public void CLEAR() {
         storage.clear();
     }
+    public Map<String, String> getStorage() {
+        return storage;
+    }
+
 }

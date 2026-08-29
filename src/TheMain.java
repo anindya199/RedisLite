@@ -1,17 +1,26 @@
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
 
 public class TheMain {
-    public static void main(String[] args) {
-        Scanner sc = new  Scanner(System.in);
+    public static void main(String[] args) throws IOException {
+        Persistence p = new  Persistence();
         Database db = new Database();
+        try{
+            p.readFromFile(db.getStorage());
+            System.out.println(db.GET("name"));
+            System.out.println(db.KEYS());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Scanner sc = new  Scanner(System.in);
+//        Database db = new Database();
+
         boolean flag = true;
         while(flag) {
             String input = sc.nextLine();
             List<String> words = List.of(input.split("\\s+"));
-
 
             switch (words.get(0)) {
                 case "SET": {
@@ -46,8 +55,15 @@ public class TheMain {
                     System.out.println("Invalid command");
                 }
             }
-
-
         }
+        //write
+        try {
+            p.createFile();
+            p.writeToFile(db.getStorage());
+        }
+        catch (IOException e) {
+            throw  new IOException("Unable to create file");
+        }
+
     }
 }
