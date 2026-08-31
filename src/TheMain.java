@@ -10,7 +10,7 @@ public class TheMain {
         try{
             p.readFromFile(db.getStorage());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return;
         }
         Scanner sc = new  Scanner(System.in);
 
@@ -26,15 +26,22 @@ public class TheMain {
                 case "SET": {
                     if(words.size() < 3)
                         System.out.println("Error: SET requires a Key and a Value");
-                    else
-                        db.SET(words.get(1), words.get(2));
+                    else {
+                        Object val = words.get(2);
+                        ValueType valType = ValueParser.detectType(words.get(2));
+                        Value result = new Value(valType,Persistence.getObject(valType, words.get(2)));
+                        db.SET(words.get(1),result);
+                    }
                     break;
                 }
                 case "GET": {
                     if(words.size()<2)
                         System.out.println("Error: GET requires a KEY");
-                    else
-                        System.out.println(db.GET(words.get(1)));
+                    else{
+                        Value value = db.GET(words.get(1));
+                        if(value!=null)
+                            System.out.println(value.getValue());
+                    }
                     break;
                 }
                 case "DELETE": {
