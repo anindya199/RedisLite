@@ -1,0 +1,4 @@
+city->STRING->Kolkata
+name->STRING->Anindya
+active->BOOLEAN->true
+age->INTEGER->25
