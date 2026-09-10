@@ -1,7 +1,5 @@
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Database {
     private final Map<String,Value> storage;
@@ -30,5 +28,18 @@ public class Database {
     public Map<String, Value> getStorage() {
         return storage;
     }
+    public void deleteExpiredKeys() {
+        List<String> expiredKeys = new ArrayList<>();
+        for (String key : KEYS()) {
+            Value val = storage.get(key);
+            if(val.isExpired()){
+                expiredKeys.add(key);
+            }
+        }
 
+        for(String expiredKey : expiredKeys){
+            storage.remove(expiredKey);
+        }
+    }
 }
+

@@ -7,6 +7,8 @@ public class TheMain {
     public static void main(String[] args) throws IOException{
         Persistence p = new  Persistence();
         Database db = new Database();
+        ExpirationThread t = new ExpirationThread(db);
+        t.start();
         try{
             p.readFromFile(db.getStorage());
         } catch (IOException e) {
@@ -31,15 +33,18 @@ public class TheMain {
                         ValueType valType = ValueParser.detectType(words.get(2));
 
                         if (words.size() == 3) {
-                            Object val = words.get(2);
                             Value result = new Value(valType, Persistence.getObject(valType, words.get(2)));
                             db.SET(words.get(1), result);
                         }
                         else if (words.size() == 5 && words.get(3).equalsIgnoreCase("EX")) {
                             try{
                                 long ttl = Long.parseLong(words.get(4));
-                                Value result = new Value(valType,Persistence.getObject(valType, words.get(2)),ttl);
-                                db.SET(words.get(1), result);
+                                if(ttl>0) {
+                                    Value result = new Value(valType, Persistence.getObject(valType, words.get(2)), ttl);
+                                    db.SET(words.get(1), result);
+                                }
+                                else
+                                    System.out.println("Error: Expiration Time must be greater than 0");
                             }
                             catch (NumberFormatException e){
                                 System.out.println("Error: The required type of EX to be a Number");
@@ -60,6 +65,8 @@ public class TheMain {
                         Value value = db.GET(words.get(1));
                         if(value!=null)
                             System.out.println(value.getValue());
+                        else
+                            System.out.println("null");
                     }
                     break;
                 }
@@ -85,6 +92,15 @@ public class TheMain {
 
                 case "EXIT":{
                     flag = false;
+                    t.setIsRunning(false);
+                    t.interrupt();
+
+                    try {
+                        t.join();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
                     break;
                 }
 
@@ -107,17 +123,39 @@ public class TheMain {
                     else {
                         try{
                             long ttl = Long.parseLong(words.get(2));
-                            Value val = db.GET(words.get(1));
-                            if(val!=null){
-                                val.setExpireAt(ttl);
+                            if(ttl>0) {
+                                Value val = db.GET(words.get(1));
+                                if (val != null) {
+                                    val.setExpireAt(ttl);
+                                } else {
+                                    System.out.println("Error: Value not found");
+                                }
                             }
-                            else{
-                                System.out.println("Error: Value not found");
-                            }
+                            else
+                                System.out.println("Error: Expiration Time must be greater than 0");
                         }
                         catch (NumberFormatException e){
                             System.out.println("Error: The required type of EX to be a Number");
                         }
+                    }
+                    break;
+                }
+
+
+                case "TTL":{
+                    if(words.size()!=2)
+                        System.out.println("Error: TTL requires a Key");//if the length of the command is not 2
+                    else {
+                        Value value = db.GET(words.get(1));
+                        if(value==null)
+                            System.out.println("Error: Key does not exist");//if the given key is wrong
+
+                        else if(value.getRemainingTTL() == -1)
+                            System.out.println("Error: The Key has no expiration");
+
+                        else
+                            System.out.println(value.getRemainingTTL());
+
                     }
                     break;
                 }
@@ -136,5 +174,6 @@ public class TheMain {
         catch (IOException e) {
             throw  new IOException("Unable to create file");
         }
+
     }
 }

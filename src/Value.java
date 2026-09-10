@@ -3,7 +3,7 @@ public class Value {
     private final ValueType type;
     private final Object value;
     private long expireAt;
-//    private long ttl;
+
     public Value(ValueType type, Object value) {
         this.type = type;
         this.value = value;
@@ -29,5 +29,12 @@ public class Value {
     public void setExpireAt(long ttl) {
         long currentTime = System.currentTimeMillis();
         expireAt = currentTime + ttl*1000;
+    }
+
+    public long getRemainingTTL(){
+        if(expireAt == -1)
+            return expireAt;
+        return (expireAt -  System.currentTimeMillis())/1000;
+
     }
 }
