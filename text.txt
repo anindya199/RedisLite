@@ -1,5 +1,7 @@
 college->STRING->UEM
+city->STRING->Kolkata
 permanent->STRING->Kolkata
+phn->INTEGER->1234
 name->STRING->Anindya
 active->BOOLEAN->true
 age->INTEGER->25

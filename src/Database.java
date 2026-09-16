@@ -1,16 +1,17 @@
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Database {
-    private final Map<String,Value> storage;
+    private final ConcurrentHashMap<String,Value> storage;
     public Database() {
-        storage = new HashMap<>();
+        storage = new ConcurrentHashMap<>();
     }
 
     public void SET(String key, Value value) {
         storage.put(key, value);
     }
-    public  Value GET(String key) {
+    public Value GET(String key) {
         return storage.get(key);
     }
     public void DELETE(String key) {
@@ -28,11 +29,11 @@ public class Database {
     public Map<String, Value> getStorage() {
         return storage;
     }
-    public void deleteExpiredKeys() {
+    public synchronized void deleteExpiredKeys() {
         List<String> expiredKeys = new ArrayList<>();
         for (String key : KEYS()) {
             Value val = storage.get(key);
-            if(val.isExpired()){
+            if(val != null && val.isExpired()){
                 expiredKeys.add(key);
             }
         }
