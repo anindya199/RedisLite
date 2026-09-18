@@ -44,6 +44,6 @@ public class ThreadSafetyTest {
             System.out.println("Cache capacity respected.");
         }
 
-        System.out.println("Cache Keys: " + db.printCache());
+        System.out.println("Cache Keys: " + db.getCacheKeys());
     }
 }
