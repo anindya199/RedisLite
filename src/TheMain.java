@@ -107,6 +107,7 @@ public class TheMain {
 
                 case "KEYS": {
                     System.out.println(db.KEYS());
+                    System.out.println(db.getCacheKeys());
                     break;
                 }
 
