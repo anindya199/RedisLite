@@ -29,9 +29,11 @@ public class Database {
         }
         return value;
     }
-    public void DELETE(String key) {
-        storage.remove(key);
+    public boolean DELETE(String key) {
+        Value value = storage.remove(key);
         cache.remove(key);
+
+        return value != null;
     }
     public boolean EXISTS(String key) {
         return storage.containsKey(key);

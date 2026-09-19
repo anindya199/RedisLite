@@ -4,16 +4,19 @@ import java.util.Scanner;
 
 
 public class TheMain {
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args){
         Persistence p = new  Persistence();
         Database db = new Database();
         ExpirationThread t = new ExpirationThread(db);
         t.start();
-        try{
-            p.readFromFile(db.getStorage());
-        } catch (IOException e) {
-            return;
-        }
+
+
+        //READ FROM THE FILE (TEXT.TXT)
+        p.createFile();
+        p.readFromFile(db.getStorage());
+        System.out.printf("[INFO] Loaded %d records from disk%n", db.getDatabaseSize());
+
+        //START OF INPUT
         Scanner sc = new  Scanner(System.in);
 
         boolean flag = true;
@@ -28,7 +31,7 @@ public class TheMain {
 
                 case "SET": {
                     if (words.size() < 3)
-                        System.out.println("Error: SET requires a Key and a Value");
+                        System.out.println("[WARN] SET requires a Key and a Value");
                     else {
                         ValueType valType = ValueParser.detectType(words.get(2));
 
@@ -44,14 +47,14 @@ public class TheMain {
                                     db.SET(words.get(1), result);
                                 }
                                 else
-                                    System.out.println("Error: Expiration Time must be greater than 0");
+                                    System.out.println("[WARN] Expiration Time must be greater than 0");
                             }
                             catch (NumberFormatException e){
-                                System.out.println("Error: The required type of EX to be a Number");
+                                System.out.println("[WARN] TTL must be a Number");
                             }
                         }
                         else {
-                            System.out.println("Error: The syntax is Invalid");
+                            System.out.println("[WARN] The syntax is Invalid");
                         }
                     }
                     break;
@@ -60,7 +63,7 @@ public class TheMain {
 
                 case "GET": {
                     if(words.size()<2)
-                        System.out.println("Error: GET requires a KEY");
+                        System.out.println("[WARN] GET requires a KEY");
                     else{
                         Value value = db.GET(words.get(1));
                         if(value!=null)
@@ -74,16 +77,21 @@ public class TheMain {
 
                 case "DELETE": {
                     if(words.size()<2)
-                        System.out.println("Error: DELETE requires a KEY");
-                    else
-                        db.DELETE(words.get(1));
+                        System.out.println("[WARN] DELETE requires a KEY");
+                    else {
+                        boolean deleted = db.DELETE(words.get(1));
+                        if(deleted)
+                            System.out.println("Success");
+                        else
+                            System.out.println("[WARN] Key not found");
+                    }
                     break;
                 }
 
 
                 case "EXISTS": {
                     if(words.size()<2)
-                        System.out.println("Error: EXISTS requires a KEY");
+                        System.out.println("[WARN] EXISTS requires a KEY");
                     else
                         System.out.println(db.EXISTS(words.get(1)));
                     break;
@@ -91,6 +99,7 @@ public class TheMain {
 
 
                 case "EXIT":{
+                    System.out.println("[INFO] Shutting down...");
                     flag = false;
                     t.setIsRunning(false);
                     t.interrupt();
@@ -100,7 +109,6 @@ public class TheMain {
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
-
                     break;
                 }
 
@@ -120,7 +128,7 @@ public class TheMain {
 
                 case "EXPIRE":{
                     if(words.size() != 3)
-                        System.out.println("Error: EXPIRE requires a Key and a Value");
+                        System.out.println("[WARN] EXPIRE requires a Key and a Value");
                     else {
                         try{
                             long ttl = Long.parseLong(words.get(2));
@@ -129,14 +137,14 @@ public class TheMain {
                                 if (val != null) {
                                     val.setExpireAt(ttl);
                                 } else {
-                                    System.out.println("Error: Value not found");
+                                    System.out.println("[WARN] Value not found");
                                 }
                             }
                             else
-                                System.out.println("Error: Expiration Time must be greater than 0");
+                                System.out.println("[WARN] Expiration Time must be greater than 0");
                         }
                         catch (NumberFormatException e){
-                            System.out.println("Error: The required type of EX to be a Number");
+                            System.out.println("[WARN] TTL must be a Number");
                         }
                     }
                     break;
@@ -145,14 +153,14 @@ public class TheMain {
 
                 case "TTL":{
                     if(words.size()!=2)
-                        System.out.println("Error: TTL requires a Key");//if the length of the command is not 2
+                        System.out.println("[WARN] TTL requires a Key");//if the length of the command is not 2
                     else {
                         Value value = db.GET(words.get(1));
                         if(value==null)
-                            System.out.println("Error: Key does not exist");//if the given key is wrong
+                            System.out.println("[WARN] Key does not exist");//if the given key is wrong
 
                         else if(value.getRemainingTTL() == -1)
-                            System.out.println("Error: The Key has no expiration");
+                            System.out.println("[WARN] The Key has no expiration");
 
                         else
                             System.out.println(value.getRemainingTTL());
@@ -163,18 +171,14 @@ public class TheMain {
 
 
                 default:{
-                    System.out.println("Invalid command");
+                    System.out.println("[WARN] Invalid command");
                 }
             }
         }
-        //write
-        try {
-            p.createFile();
-            p.writeToFile(db.getStorage());
-        }
-        catch (IOException e) {
-            throw  new IOException("Unable to create file");
-        }
+        sc.close();
+        // WRITE TO THE FILE(TEXT.TXT)
+        p.createFile();
+        p.writeToFile(db.getStorage());
 
     }
 }

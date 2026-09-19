@@ -1,3 +1,2 @@
-A->INTEGER->1
-B->INTEGER->2
-C->INTEGER->3
+name->STRING->Anindya
+age->INTEGER->26
