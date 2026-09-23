@@ -1,5 +1,7 @@
 ### IntelliJ IDEA ###
 data.txt
+RedisLite.iml
+.idea/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
