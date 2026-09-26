@@ -12,7 +12,9 @@ public class Database {
 
     public void SET(String key, Value value) {
         storage.put(key, value);
-        cache.put(key,true);
+        synchronized (cache) {
+            cache.put(key, true);
+        }
     }
     public Value GET(String key) {
 
@@ -21,17 +23,20 @@ public class Database {
         if(value == null) {
             return null;
         }
-
-        if(cache.containsKey(key))
-            cache.get(key);
-        else{
-            cache.put(key, true);
+        synchronized (cache) {
+            if (cache.containsKey(key))
+                cache.get(key);
+            else {
+                cache.put(key, true);
+            }
         }
         return value;
     }
     public boolean DELETE(String key) {
         Value value = storage.remove(key);
-        cache.remove(key);
+        synchronized (cache) {
+            cache.remove(key);
+        }
 
         return value != null;
     }
@@ -43,7 +48,9 @@ public class Database {
     }
     public void CLEAR() {
         storage.clear();
-        cache.clear();
+        synchronized(cache) {
+            cache.clear();
+        }
     }
     public Map<String, Value> getStorage() {
         return storage;
@@ -59,16 +66,23 @@ public class Database {
 
         for(String expiredKey : expiredKeys){
             storage.remove(expiredKey);
-            cache.remove(expiredKey);
+            synchronized (cache) {
+                cache.remove(expiredKey);
+            }
         }
     }
 
     public Set<String> getCacheKeys() {
-        return cache.keySet();
+        synchronized (cache) {
+            return new HashSet<>(cache.keySet());
+
+        }
     }
 
     public int getCacheSize() {
-        return cache.size();
+        synchronized (cache) {
+            return cache.size();
+        }
     }
 
     public int getDatabaseSize() {

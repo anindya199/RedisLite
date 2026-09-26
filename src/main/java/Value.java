@@ -12,9 +12,13 @@ public class Value {
     public Value(ValueType type, Object value,long ttl) {
         this.type = type;
         this.value = value;
+        if(ttl>0) {
+            long currentTime = System.currentTimeMillis();
+            expireAt = currentTime + ttl * 1000;
 
-        long currentTime = System.currentTimeMillis();
-        expireAt = currentTime + ttl*1000;
+        }
+        else
+            expireAt = -1;
     }
     public ValueType getType(){
         return type;
@@ -27,8 +31,12 @@ public class Value {
     }
 
     public void setExpireAt(long ttl) {
-        long currentTime = System.currentTimeMillis();
-        expireAt = currentTime + ttl*1000;
+        if(ttl>0) {
+            long currentTime = System.currentTimeMillis();
+            expireAt = currentTime + ttl * 1000;
+        }
+        else
+            expireAt = -1;
     }
 
     public long getRemainingTTL(){

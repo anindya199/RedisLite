@@ -1,6 +1,10 @@
-public class ThreadSafetyTest {
+import org.junit.jupiter.api.Test;
 
-    public static void main(String[] args) throws InterruptedException {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class ThreadSafetyTest {
+    @Test
+    public void threadSafetyTest() throws InterruptedException {
 
         Database db = new Database();
 
@@ -34,16 +38,7 @@ public class ThreadSafetyTest {
         reader.join();
         deleter.join();
 
-        System.out.println("Test Completed");
-        System.out.println("Cache Size: " + db.getCacheSize());
-        System.out.println("Database Size: " + db.getDatabaseSize());
-
-        if (db.getCacheSize() > 5) {
-            System.out.println("ERROR: Cache exceeded capacity!");
-        } else {
-            System.out.println("Cache capacity respected.");
-        }
-
-        System.out.println("Cache Keys: " + db.getCacheKeys());
+        System.out.println("Cache Size = " + db.getCacheSize());
+        assertTrue(db.getCacheSize() <= 5);
     }
 }
